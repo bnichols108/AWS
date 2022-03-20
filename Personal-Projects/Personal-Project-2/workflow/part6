@@ -1,0 +1,22 @@
+1. Modified the manage-rpms.yaml playbook to now install wget
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/playbooks/manage-rpms.yaml
+sudo mkdir -p /etc/ansible/roles/manage-rpms/tasks
+sudo vim /etc/ansible/roles/manage-rpms/tasks/main.yml
+
+2. Run the manage-rpms playbook
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+ansible-playbook /etc/ansible/playbooks/manage-rpms.yaml
+
+3. Downloaded the splunk forwarder on aws-docker-wordpress EC2 instance and push file to the docker instance
+- EC2 Instance: aws-docker-wordpress
+- Private IP: 172.31.25.43
+- Public IP: 54.221.68.195
+- User: ec2-user
+sudo wget -O splunkforwarder-8.2.0-e053ef3c985f-linux-2.6-amd64.deb 'https://www.splunk.com/bin/splunk/DownloadActivityServlet?architecture=x86_64&platform=linux&version=8.2.0&product=universalforwarder&filename=splunkforwarder-8.2.0-e053ef3c985f-linux-2.6-amd64.deb&wget=true'

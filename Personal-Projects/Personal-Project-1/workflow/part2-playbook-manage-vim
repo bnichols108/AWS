@@ -1,0 +1,51 @@
+10. Created playbooks directory and first playbook to manage VIM
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ec2-user
+sudo mkdir /etc/ansible/playbooks
+sudo vi /etc/ansible/playbooks/manage-vim.yaml
+- Added the following:
+---
+  - name: manage-vim
+    hosts: linux
+    tasks:
+      - name: install, update, and manage VIM
+        yum:
+          name: vim
+          state: latest
+    become: yes
+
+11. Ran manage-vim playbook twice. Once for changes, second to confirm no more changes.
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+[ansible@ip-172-31-29-165 ~]$ ansible-playbook /etc/ansible/playbooks/manage-vim.yaml
+
+PLAY [manage-vim] ***************************************************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************
+ok: [172.31.22.3]
+ok: [172.31.25.232]
+
+TASK [install, update, and manage VIM] ************************************************************************************************************************************
+changed: [172.31.22.3]
+changed: [172.31.25.232]
+
+PLAY RECAP **********************************************************************************************************************************************************
+172.31.22.3                : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+172.31.25.232              : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+[ansible@ip-172-31-29-165 ~]$ ansible-playbook /etc/ansible/playbooks/manage-vim.yaml
+
+PLAY [manage-vim] ***************************************************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************
+ok: [172.31.25.232]
+ok: [172.31.22.3]
+
+TASK [install, update, and manage VIM] ******************************************************************************************************************************
+ok: [172.31.25.232]
+ok: [172.31.22.3]
+
+PLAY RECAP **********************************************************************************************************************************************************
+172.31.22.3                : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+172.31.25.232              : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

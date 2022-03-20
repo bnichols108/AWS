@@ -1,0 +1,7 @@
+1. I'm now able to hit port 80 for the public IP for my wordpress instance
+http://ec2-54-221-68-195.compute-1.amazonaws.com/wp-admin/setup-config.php
+
+2. Configure wordpress
+username: bnichols
+password: #######
+email: bnichols108@gmail.com

@@ -1,0 +1,22 @@
+1. Create a user with the power role.
+Username: power
+Password: #######
+
+2. Started working on the splunk lab. While uploading practice data to splunk, splunk crashed. 
+
+3. I determined the AWS free EC2 instance option wasn't able to keep up with splunk. 
+
+4. Turned off the splunk-dev EC2 instance and changed the instance type.
+- Changed instance type from t2.micro to c4.2xlarge
+
+5. Also had to add changes to the server.conf file in order to upload the lab data.
+vim /opt/splunk/etc/system/local/server.conf
+[queue=parsingQueue]
+maxSize = 10MB
+[queue=indexqueue]
+maxSize = 10MB
+[diskUsage]
+minFreeSpace = 1000
+
+6. Completed the Splunk 7.x Fundamentals training.
+- See the following: https://raw.githubusercontent.com/bnichols108/AWS-Splunk-Ansible-Docker-Wordpress-Project/main/splunk-fundamentals/commands

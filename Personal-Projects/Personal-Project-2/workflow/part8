@@ -1,0 +1,30 @@
+1. Copy the package to the container
+sudo docker cp splunkforwarder-8.2.0-e053ef3c985f-linux-2.6-amd64.deb wordpress_wordpress_1:/root
+
+2. Connect to the container 
+sudo docker ps 
+sudo docker exec -it wordpress_wordpress_1 /bin/bash
+
+3. Install the splunk .deb package 
+dpkg -i splunkforwarder-8.2.0-e053ef3c985f-linux-2.6-amd64.deb
+
+4. Change to the splunkforwarder directory
+cd /opt/splunkforwarder/bin
+
+5. Start splunk forwarder 
+/opt/splunkforwarder/bin/splunk start --accept-license
+
+6. Provide administrator username and password for the wordpress container
+username: adminwordpress
+password: #######
+
+7. Enable splunk forwarder daemon at boot/startup
+/opt/splunkforwarder/bin/splunk enable boot-start
+
+8. Add forward-server command for the universal forwarder
+/opt/splunkforwarder/bin/splunk add forward-server 172.31.19.30:9997 -auth adminwordpress:#######
+Added forwarding to: 172.31.19.30:9997.
+
+9. Inform splunk forwarder which directory to monitor and send to the splunk instance
+/opt/splunkforwarder/bin/splunk add monitor /var/log/apache2
+Added monitor of '/var/log/apache2'.

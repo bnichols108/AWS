@@ -1,0 +1,103 @@
+1. Created new AWS EC2 instance for splunk via my current IaC Ansible playbook
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+[ansible@ip-172-31-29-165 ~]$ ansible-playbook /etc/ansible/playbooks/launch-ec2-instance.yaml
+/usr/lib/python3.6/site-packages/requests/__init__.py:91: RequestsDependencyWarning: urllib3 (1.26.4) or chardet (3.0.4) doesn't match a supported version!
+  RequestsDependencyWarning)
+
+PLAY [localhost] *********************************************************************************************************************************************************************************************
+
+TASK [Provision ec2 instance] ********************************************************************************************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP ***************************************************************************************************************************************************************************************************
+localhost                  : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+2. In Amazon EC2 Dashboad, renamed the new splunk EC2 instance to: splunk-dev
+
+3. Created splunk user on splunk-dev
+- EC2 Instance: splunk-dev
+- Private IP: 172.31.19.30
+- User: ec2-user 
+sudo useradd splunk
+sudo passwd splunk
+#######
+
+4. Installed wget, downloaded splunk enterprise rpm, installed rpm
+- EC2 Instance: splunk-dev
+- Private IP: 172.31.19.30
+- User: ec2-user 
+sudo yum install wget
+wget -O splunk-8.2.0-e053ef3c985f-linux-2.6-x86_64.rpm 'https://www.splunk.com/bin/splunk/DownloadActivityServlet?architecture=x86_64&platform=linux&version=8.2.0&product=splunk&filename=splunk-8.2.0-e053ef3c985f-linux-2.6-x86_64.rpm&wget=true'
+sudo rpm -i splunk-8.2.0-e053ef3c985f-linux-2.6-x86_64.rpm
+
+5. Switched to splunk user, started splunk while accepting the license
+- EC2 Instance: splunk-dev
+- Private IP: 172.31.19.30
+- User: splunk
+[splunk@ip-172-31-19-30 ~]$ /opt/splunk/bin/splunk start --accept-license
+Please enter an administrator username: admin
+Password must contain at least:
+   * 8 total printable ASCII character(s).
+Please enter a new password: #######
+
+Waiting for web server at http://127.0.0.1:8000 to be available........... Done
+
+If you get stuck, we're here to help.
+Look for answers here: http://docs.splunk.com
+
+The Splunk web interface is at http://ip-172-31-19-30.ec2.Private:8000
+
+[splunk@ip-172-31-19-30 ~]$
+
+6. Added the new EC2 instance to the Ansible hosts/inventory file under its own group
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/hosts
+
+7. On new EC2 splunk instance, created ansible user, give sudo privs, allowed password authentication for SSH temporarily.
+- EC2 Instance: splunk-dev
+- Private IP: 172.31.19.30
+- User: ec2-user
+sudo useradd ansible
+sudo passwd ansible
+#######
+sudo visudo
+- "ansible         ALL=(ALL)       NOPASSWD: ALL"
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication yes"
+sudo systemctl restart sshd
+
+8. Set up password-less SSH between aws-ansible-control and new splunk-dev EC2 instance
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: splunk
+ssh-copy-id 172.31.19.30
+
+9. With security in mind, remove the password authentication for SSH on splunk-dev EC2 instance
+- EC2 Instance: splunk-dev
+- Private IP: 172.31.19.30
+- User: ec2-user
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication no"
+sudo systemctl restart sshd
+
+10. Tested ansible connection from aws-ansible-control to splunk-dev host group with ping module
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+[ansible@aws-ansible-control ~]$ ansible splunk -m ping
+172.31.19.30 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+[ansible@aws-ansible-control ~]$

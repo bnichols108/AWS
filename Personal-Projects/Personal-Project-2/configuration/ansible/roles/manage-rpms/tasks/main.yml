@@ -1,0 +1,10 @@
+---
+- name: install latest VIM
+  yum:
+    name: vim
+    state: latest
+
+- name: install latest wget
+  yum:
+    name: wget
+    state: latest

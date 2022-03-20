@@ -1,0 +1,9 @@
+---
+  - name: manage-vim
+    hosts: linux
+    tasks:
+      - name: install, update, and manage VIM
+        yum:
+          name: vim
+          state: latest
+    become: yes

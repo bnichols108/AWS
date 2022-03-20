@@ -1,0 +1,103 @@
+Commands and notes from Splunk 7.x Fundamentals Part 1
+
+index=main sourcetype="access_combined_wcookie" host="web-application" "success.do" | top productId limit=5 showperc=false
+
+index=main sourcetype="access_combined_wcookie" host="web-application"| rare limit=20 file by date_month
+
+index=main sourcetype="access_combined_wcookie" host="web-application" file=cart.do OR file=success.do | stats count as "Transactions" by file | rename file as Function
+
+16.
+index=main sourcetype="access_combined_wcookie" host="web-application" | stats dc(JSESSIONID) as Logins
+
+17.
+index=main sourcetype="access_combined_wcookie" host="web-application" | stats dc(JSESSIONID) as Logins by clientip
+
+18.
+index=main sourcetype="access_combined_wcookie" host="web-application" | stats dc(JSESSIONID) as Logins by clientip | sort -Logins
+
+19.
+index=main sourcetype="access_combined_wcookie" host="web-application" file=* | stats sum(bytes)
+
+20.
+index=main sourcetype="access_combined_wcookie" host="web-application" file=* | stats sum(bytes) as TotalBytes
+
+21.
+index=main sourcetype="access_combined_wcookie" host="web-application" file=* | stats sum(bytes) as TotalBytes by file
+
+22.
+index=main sourcetype="access_combined_wcookie" host="web-application" file=* | stats sum(bytes) as TotalBytes by file | sort file
+
+23.
+index=main sourcetype="access_combined_wcookie" host="web-application" file=* | stats sum(bytes) as TotalBytes by file | sort TotalBytes
+api = 1456
+
+24.
+index=main sourcetype="db_audit" host="database" | stats avg(Duration)
+
+25.
+index=main sourcetype="db_audit" host="database" | stats avg(Duration) as "Time to complete" by Command
+
+26.
+index=main sourcetype="db_audit" host="database" | stats avg(Duration) as "Time to complete" by Command | sort -"Time to complete"
+
+27.
+Time to complete = 9988
+query = 
+SELECT * FROM users INNER JOIN creditcards ON users.userid=creditcards.userid INNER JOIN contactinfo ON users.userid=contactinfo.userid INNER JOIN usertracking ON users.userid=usertracking.userid WHERE users.userid = 2208
+
+28.
+index=main sourcetype="access_combined_wcookie" host="web-application" | stats list(useragent)
+
+30.
+index=main sourcetype="access_combined_wcookie" host="web-application" | stats values(useragent) as "Agents Used"
+
+31.
+index=main sourcetype="access_combined_wcookie" host="web-application" | stats values(useragent) as "Agents Used" count as "Times Used" by useragent
+
+32.
+index=main sourcetype="access_combined_wcookie" host="web-application" | stats values(useragent) as "Agents Used" count as "Times Used" by useragent | table "Agents Used", "Times Used"
+
+
+Module10:
+
+2. 
+index=main sourcetype="access_combined_wcookie" host="web-application" status=403
+
+3.
+index=main sourcetype="access_combined_wcookie" host="web-application" status=403 | stats count as Attempts by clientip
+
+4.
+index=main sourcetype="access_combined_wcookie" host="web-application" status=403 | stats count as Attempts by clientip | sort -Attempts
+
+5.
+attempts=100, clientip = 73.202.92.7
+
+12.
+index=main sourcetype="access_combined_wcookie" host="web-application" status=200 file=success.do
+
+13.
+index=main sourcetype="access_combined_wcookie" host="web-application" status=200 file=success.do | stats count by productId
+
+
+Module12:
+
+14.
+| inputlookup products_lookup
+
+16.
+index=main sourcetype="access_combined_wcookie" host="web-application" status=200 file=success.do | lookup products_lookup productId as productId OUTPUT product_name as ProductName
+
+18.
+index=main sourcetype=access_combined_wcookie status=200 file=success.do | lookup products_lookup
+productId as productId OUTPUT product_name as ProductName | stats count by ProductName
+
+22.
+index=main sourcetype="access_combined_wcookie" status=200 file=success.do | stats sum(Price) as Revenue by ProductName
+
+23.
+index=main sourcetype="access_combined_wcookie" status=200 file=success.do | stats sum(Price) as Revenue by ProductName | sort -Revenue
+
+
+Module13:
+5. 
+index=_audit action="login attempt" info="failed" user="admin"

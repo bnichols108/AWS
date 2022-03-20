@@ -1,0 +1,137 @@
+Docker module to manage docker container on newly provisioned EC2 instance
+
+1. On new EC2 RHEL instance, create ansible user, give sudo privs, allow password authentication for SSH temporarily.
+AWS Docker Instance:
+- ip: 172.31.20.16
+- user: ec2-user
+sudo useradd ansible
+sudo passwd ansible
+sudo visudo
+- "ansible         ALL=(ALL)       NOPASSWD: ALL"
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication yes"
+sudo systemctl restart sshd
+
+2. Set up passwordless SSH to new RHEL EC2 instance
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+ssh-copy-id 172.31.20.16
+
+3. With security in mind, remove the password authentication for SSH. 
+AWS Docker Instance:
+- ip: 172.31.20.16
+- user: ec2-user
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication no"
+sudo systemctl restart sshd
+
+4. Modified the ansible hosts/inventory file to include new docker EC2 instance.
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ec2-user
+sudo vi /etc/ansible/hosts
+- Added the following:
+[docker]
+172.31.20.16
+
+5. Tested ansible connection from Control to Docker instance with ping module.
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+[ansible@ip-172-31-29-165 ~]$ ansible docker -m ping
+172.31.20.16 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+6. Created playbook to manage docker container.
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ec2-user
+sudo vi /etc/ansible/playbooks/install-docker-launch-jenkins-container.yaml
+- Added the following:
+---
+  - name: Config Docker EC2 instance with Jenkins
+    hosts: docker
+    become: true
+    tasks:
+
+    - name: Add Docker CE repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+        force: yes
+
+    - name: Install docker
+      yum:
+        update_cache: yes
+        name: docker-ce
+        state: latest
+
+    - name: Install pip3
+      yum:
+        name: python3-pip
+        state: latest
+
+    - name: Install Python Docker Module
+      pip:
+        name: docker
+        state: latest
+
+    - name: Start docker
+      service:
+        name: docker
+        state: started
+
+    - name: Pull the official jenkins docker image
+      docker_image:
+        name: jenkins/jenkins
+        source: pull
+
+    - name: Launch the latest docker jenkins container
+      docker_container:
+        name: jenkins-server
+        image: jenkins/jenkins
+        state: started
+        restart_policy: always
+        published_ports: 80:80
+
+7. Ran install-docker-launch-jenkins-container playbook to install docker, docker dependencies, pull jenkins image, start jenkins docker all on the new EC2 RHEL instance. 
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+ansible-playbook /etc/ansible/playbooks/install-docker-launch-jenkins-container.yaml
+
+[ansible@ip-172-31-29-165 ~]$ ansible-playbook /etc/ansible/playbooks/install-docker-launch-jenkins-container.yaml
+PLAY [Config Docker EC2 instance with Jenkins] ***************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************************************************
+ok: [172.31.20.16]
+
+TASK [Add Docker CE repo] ************************************************************************************************************************************************************************************
+changed: [172.31.20.16]
+
+TASK [Install docker] ****************************************************************************************************************************************************************************************
+changed: [172.31.20.16]
+
+TASK [Install pip3] ******************************************************************************************************************************************************************************************
+changed: [172.31.20.16]
+
+TASK [Install Python Docker Module] **************************************************************************************************************************************************************************
+changed: [172.31.20.16]
+
+TASK [Start docker] ******************************************************************************************************************************************************************************************
+changed: [172.31.20.16]
+
+TASK [Pull the official jenkins docker image] ****************************************************************************************************************************************************************
+changed: [172.31.20.16]
+
+TASK [Launch the latest docker jenkins container] ************************************************************************************************************************************************************
+changed: [172.31.20.16]
+
+PLAY RECAP ***************************************************************************************************************************************************************************************************
+172.31.20.16               : ok=8    changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

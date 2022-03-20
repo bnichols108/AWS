@@ -1,0 +1,38 @@
+---
+  - name: Install and start Docker
+    hosts: docker-all
+    become: true
+    tasks:
+
+    - name: Add Docker CE repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+        force: yes
+
+    - name: Install docker
+      yum:
+        update_cache: yes
+        name: docker-ce
+        state: latest
+
+    - name: Install pip3
+      yum:
+        name: python3-pip
+        state: latest
+
+    - name: Install Python Docker Module
+      pip:
+        name: docker
+        state: latest
+        
+    - name: Install docker-compose
+      get_url:
+        url : https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 'u+x,g+x'
+
+    - name: Start docker
+      service:
+        name: docker
+        state: started

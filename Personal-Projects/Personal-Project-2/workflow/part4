@@ -1,0 +1,123 @@
+1. Created a version 2 of my ec2 launcher playbook in order to be more dynamic and allow variables for instance name and security group.
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/playbooks/launch-ec2-instance-v2.yaml
+
+2. Ran the launch-ec2-instance-v2 playbook
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+ansible-playbook /etc/ansible/playbooks/launch-ec2-instance-v2.yaml -e "group_name=Splunk-Wordpress-SG name_tag=AWS-Docker-Wordpress"
+
+3. Added the new EC2 instance to the Ansible hosts/inventory file under its own group and also updated the group structure
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/hosts
+
+4. On new EC2 instance, created ansible user, give sudo privs, allow password authentication for SSH temporarily.
+- EC2 Instance: aws-docker-wordpress
+- Private IP: 172.31.25.43
+- Public IP: 54.221.68.195
+- User: ec2-user
+sudo useradd ansible
+sudo passwd ansible
+#######
+sudo visudo
+- "ansible         ALL=(ALL)       NOPASSWD: ALL"
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication yes"
+sudo systemctl restart sshd
+
+5. Set up password-less SSH between aws-ansible-control and new aws-docker-wordpress EC2 instance
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+ssh-copy-id 172.31.25.43
+
+6. With security in mind, remove the password authentication for SSH on aws-docker-wordpress EC2 instance.
+- EC2 Instance: aws-docker-wordpress
+- Private IP: 172.31.25.43
+- Public IP: 54.221.68.195
+- User: ec2-user
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication no"
+sudo systemctl restart sshd
+
+7. Tested ansible connection from aws-ansible-control to docker-wordpress host group with ping module
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+ansible docker-wordpress -m ping
+[ansible@aws-ansible-control ~]$ ansible docker-wordpress -m ping
+172.31.25.43 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+8. Create new playbook to only install and launch docker
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/playbooks/install-docker-and-launch.yaml
+
+9. Create new playbook to only pull and launch wordpress container 
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/playbooks/pull-and-launch-wordpress-container.yaml
+
+10. Ran pull-and-launch-wordpress-container.yaml playbook
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+[ansible@ip-172-31-29-165 ~]$ ansible-playbook /etc/ansible/playbooks/pull-and-launch-wordpress-container.yaml
+
+11. Added the wordpress-docker role to the pull-and-launch-wordpress-container.yaml file
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/playbooks/pull-and-launch-wordpress-container.yaml
+
+12. Create directories for the wordpress-docker role 
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo mkdir /etc/ansible/roles/wordpress-docker
+sudo mkdir /etc/ansible/roles/wordpress-docker/templates
+sudo mkdir /etc/ansible/roles/wordpress-docker/tasks
+
+13. Created the tasks for the wordpress-docker role
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/roles/wordpress-docker/tasks/main.yml
+
+14. Created the template for the wordpress-docker role
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ec2-user
+sudo vim /etc/ansible/roles/wordpress-docker/templates/docker-compose.yml
+
+15. Ran the pull-and-launch-wordpress-container playbook
+- EC2 Instance: AWS-Ansible-Control
+- Private IP: 172.31.29.165
+- Elastic IP: 34.226.92.114
+- User: ansible
+ansible-playbook /etc/ansible/playbooks/pull-and-launch-wordpress-container.yaml

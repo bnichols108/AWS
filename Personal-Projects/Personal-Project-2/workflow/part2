@@ -1,0 +1,15 @@
+1. Reserved a domain name for 1 year with AWS Route 53 for the splunk-dev EC2 instance. Name is: splunk-dev.link
+- Domain name: splunk-dev.link
+- Price: $5.00
+- Turned off automatic renewal
+- Check progress here: https://console.aws.amazon.com/route53/home#DomainRequests:
+
+2. Configured Route 53 - Network Load Balancer, target group, registered target, and Route 53 A records.
+- EC2 > Load Balancers > Created load balancer named: splunk-LB
+- EC2 > Target Groups > Created target group named: splunk-target-group
+- EC2 > Target Groups > splunk-target-group > Register Targets > chose the splunk-dev instance and set the port for 8000 > Include as pending below
+- Route 53 > Under DNS Management > Click Hosted Zone > Chose my splunk-dev.link domain > Chose the A record > Edit Record > Routed traffic to the Network Load Balancer (NLB)
+
+3. While these DNS changes propogated, I used the EC2 Public IPv4 DNS assigned by AWS.
+
+4. Later confirmed that the entire configuration (Network Load Balancer, target group, registered target, and Route 53 A records) were working properly by hitting the splunk-dev.link:8000 page successfully

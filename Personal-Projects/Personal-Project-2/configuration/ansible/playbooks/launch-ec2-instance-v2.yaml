@@ -1,0 +1,20 @@
+---
+
+- hosts: localhost
+  gather_facts: False
+
+  tasks:
+
+    - name: Provision ec2 instance
+      ec2:
+          key_name: Windows-Desktop-Keys
+          instance_type: t2.micro
+          image: ami-0b0af3577fe5e3532
+          wait: yes
+          group: '{{ group_name }}'
+          count: 1
+          vpc_subnet_id: subnet-dd0f0390
+          assign_public_ip: yes
+          region: us-east-1
+          instance_tags:
+            Name: '{{ name_tag }}'

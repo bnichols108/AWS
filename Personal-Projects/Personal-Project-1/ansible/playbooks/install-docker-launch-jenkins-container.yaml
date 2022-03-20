@@ -1,0 +1,45 @@
+---
+  - name: Config Docker EC2 instance with Jenkins
+    hosts: docker
+    become: true
+    tasks:
+
+    - name: Add Docker CE repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+        force: yes
+
+    - name: Install docker
+      yum:
+        update_cache: yes
+        name: docker-ce
+        state: latest
+
+    - name: Install pip3
+      yum:
+        name: python3-pip
+        state: latest
+
+    - name: Install Python Docker Module
+      pip:
+        name: docker
+        state: latest
+
+    - name: Start docker
+      service:
+        name: docker
+        state: started
+
+    - name: Pull the official jenkins docker image
+      docker_image:
+        name: jenkins/jenkins
+        source: pull
+
+    - name: Launch the latest docker jenkins container
+      docker_container:
+        name: jenkins-server
+        image: jenkins/jenkins
+        state: started
+        restart_policy: always
+        published_ports: 80:80

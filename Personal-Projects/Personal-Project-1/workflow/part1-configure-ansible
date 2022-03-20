@@ -1,0 +1,97 @@
+1. Grab latest packages, install ansible, create ansible user.
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ec2-user
+sudo yum update -y
+sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+sudo yum install ansible -y
+sudo useradd ansible
+sudo passwd ansible
+
+2. Create ansible user, give sudo privs, allow password authentication for SSH temporarily.
+AWS-Ansible-Receiver1
+- ip: 172.31.22.3
+- user: ec2-user
+sudo useradd ansible
+sudo passwd ansible
+sudo visudo
+- "ansible         ALL=(ALL)       NOPASSWD: ALL"
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication yes"
+sudo systemctl restart sshd
+
+3. Create ansible user, give sudo privs, allow password authentication for SSH temporarily.
+AWS-Ansible-Receiver2
+- ip: 172.31.25.232
+- user: ec2-user
+sudo useradd ansible
+sudo passwd ansible
+sudo visudo
+- "ansible         ALL=(ALL)       NOPASSWD: ALL"
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication yes"
+sudo systemctl restart sshd
+
+4. Create key pair and set up passwordless SSH to Receiver EC2 instances
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+ssh-keygen
+ssh-copy-id 172.31.22.3
+ssh-copy-id 172.31.25.232
+
+5. With security in mind, remove the password authentication for SSH. 
+AWS-Ansible-Receiver1
+- ip: 172.31.22.3
+- user: ec2-user
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication no"
+sudo systemctl restart sshd
+
+6. With security in mind, remove the password authentication for SSH. 
+AWS-Ansible-Receiver2
+- ip: 172.31.25.232
+- user: ec2-user
+sudo vi /etc/ssh/sshd_config
+- "PasswordAuthentication no"
+sudo systemctl restart sshd
+
+7. Modified the ansible hosts/inventory file
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ec2-user
+sudo vi /etc/ansible/hosts
+- Added the following:
+[linux]
+172.31.22.3
+172.31.25.232
+
+8. Tested ansible connection from Control to Receivers with ping module
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+[ansible@ip-172-31-29-165 ~]$ ansible linux -m ping
+172.31.22.3 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+172.31.25.232 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+9. Ran ad-hoc command to see redhat release of Receivers.
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+[ansible@ip-172-31-29-165 ~]$ ansible linux -a "cat /etc/redhat-release"
+172.31.22.3 | CHANGED | rc=0 >>
+Red Hat Enterprise Linux release 8.4 (Ootpa)
+172.31.25.232 | CHANGED | rc=0 >>
+Red Hat Enterprise Linux release 8.4 (Ootpa)

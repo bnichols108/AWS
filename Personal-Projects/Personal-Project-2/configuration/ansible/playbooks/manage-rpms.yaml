@@ -1,0 +1,6 @@
+---
+  - name: manage-vim
+    hosts: linux-all
+    become: true
+    roles:
+      - manage-rpms

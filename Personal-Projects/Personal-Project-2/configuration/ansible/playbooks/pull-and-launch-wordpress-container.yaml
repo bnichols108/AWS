@@ -1,0 +1,7 @@
+---
+  - import_playbook: install-docker-and-launch.yaml
+  - name: Pull Wordpress docker image and launch the container
+    hosts: docker-wordpress
+    become: true
+    roles:
+      - wordpress-docker

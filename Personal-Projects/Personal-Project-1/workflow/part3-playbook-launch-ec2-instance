@@ -1,0 +1,53 @@
+AWS module to launch EC2 instance:
+
+1. Installed boto since it is required for this AWS module
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ec2-user
+sudo pip3 install boto
+
+2. Created playbook to launch EC2 instances.
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ec2-user
+sudo vi /etc/ansible/playbooks/launch-ec2-instance.yaml
+- Added the following:
+---
+
+- hosts: localhost
+  gather_facts: False
+
+  tasks:
+
+    - name: Provision ec2 instance
+      ec2:
+          key_name: Windows-Desktop-Keys
+          instance_type: t2.micro
+          image: ami-0b0af3577fe5e3532
+          wait: yes
+          group: launch-wizard-2
+          count: 1
+          vpc_subnet_id: subnet-dd0f0390
+          assign_public_ip: yes
+          region: us-east-1
+
+
+3. Set variables for AWS authentication. Then ran launch-ec2-instance playbook to start a new instance with a RHEL image. 
+AWS Ansible Control:
+- ip: 172.31.29.165
+- user: ansible
+export AWS_SECRET_ACCESS_KEY='########'
+export AWS_ACCESS_KEY_ID='########'
+ansible-playbook /etc/ansible/playbooks/launch-ec2-instance.yaml
+
+[ansible@ip-172-31-29-165 ~]$ ansible-playbook /etc/ansible/playbooks/launch-ec2-instance.yaml
+/usr/lib/python3.6/site-packages/requests/__init__.py:91: RequestsDependencyWarning: urllib3 (1.26.4) or chardet (3.0.4) doesn't match a supported version!
+  RequestsDependencyWarning)
+
+PLAY [localhost] ****************************************************************************************************************************************************
+
+TASK [Provision ec2 instance] ***************************************************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP **********************************************************************************************************************************************************
+localhost                  : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

@@ -1,4 +1,4 @@
-Commands and notes from Splunk 7.x Fundamentals Part 1
+Queries and notes from Splunk 7.x Fundamentals Part 1
 
 index=main sourcetype="access_combined_wcookie" host="web-application" "success.do" | top productId limit=5 showperc=false
 

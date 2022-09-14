@@ -40,7 +40,7 @@ Modified the AWS security group to allow the following:
 
 
 # AWS Ansible Topology
-![AWS Ansible Topology](https://raw.githubusercontent.com/bnichols108/AWS-EC2-Ansible-Project/main/topology/AWS%20Ansible%20Topology.png)
+![AWS Ansible Topology](https://github.com/bnichols108/AWS/blob/97a9fc11310abdd21116d7af5bc726284936985a/Personal-Projects/Personal-Project-1/topology/AWS%20Ansible%20Topology.png)
 
 # Workflow
 Part1:
